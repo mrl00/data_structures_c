@@ -6,6 +6,7 @@ typedef struct {
   void**  values;
   size_t  len, capacity;
   void*   minimum;
+  void*   maximum;
   int     (*compare)(const void*, const void*);
 } ArrList;
 
@@ -15,7 +16,7 @@ ArrList* init_list(size_t capacity, int (*compare)(const void*, const void*)) {
   l->len = 0;
   l->values = (void**) calloc(capacity, sizeof(void*));
   l->compare = compare;
-  l->minimum = NULL;
+  l->minimum = l->maximum = NULL;
   return l;
 }
 
@@ -27,6 +28,8 @@ void add_value(ArrList *l, void *value) {
   
   if(l->minimum == NULL || l->compare(l->minimum, value) > 0)
     l->minimum = value;
+  if(l->maximum == NULL || l->compare(l->maximum, value) < 0)
+    l->maximum = value;
 
   l->values[l->len++] = value;
 }
@@ -39,6 +42,6 @@ void destroy_arrlist(ArrList *list, void (*destroy_value)(void* value)) {
 
 bool is_empty(ArrList *list) { return list->len == 0;}
 
-int main(void){
+int main(void) {
  return  EXIT_SUCCESS;
 }
