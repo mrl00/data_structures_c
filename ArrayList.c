@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/** START LIST **/
 typedef struct {
   void**  values;
   size_t  len, capacity;
@@ -27,9 +28,9 @@ void add_value(ArrList *l, void *value) {
     l->values = realloc(l->values, l->capacity *sizeof(void*));
   }
   
-  if(l->minimum == NULL || l->compare(l->minimum, value) > 0)
+  if(l->minimum == NULL || l->compare(l->minimum, value) < 0)
     l->minimum = value;
-  if(l->maximum == NULL || l->compare(l->maximum, value) < 0)
+  if(l->maximum == NULL || l->compare(l->maximum, value) > 0)
     l->maximum = value;
 
   l->values[l->len++] = value;
@@ -47,6 +48,7 @@ void walk(ArrList *l, void (*action)(void*)) {
 }
 
 bool is_empty(ArrList *list) { return list->len == 0;}
+/** END LIST **/
 
 typedef struct {
   int a;
@@ -58,21 +60,46 @@ int compare_test(const void* a, const void* b) {
   return (y->a - x->a);
 }
 
+int compare_int(const void* a, const void* b) {
+  return (*(int*)b - *(int*)a);
+}
+
 void show_test(void *t) {
-  printf("t-value::%d\n", ((Test*) t)->a);
+  printf("%d ", ((Test*) t)->a);
+}
+
+void show_int(void* i) {
+  printf("%d ", *(int*)i);
 }
 
 int main(void) {
+  // Struct Test
   Test t[] = {{.a = 3}, {.a = 2}, {.a = 1}};
+  ArrList *t_list = init_list(3, compare_test);
+  add_value(t_list, &t);
+  add_value(t_list, &t[1]);
+  add_value(t_list, &t[2]);
 
-  ArrList *l = init_list(3, compare_test);
-  add_value(l, &t);
-  add_value(l, &t[1]);
-  add_value(l, &t[2]);
+  printf("before qsort: "); walk(t_list, show_test);
+  qsort(t_list->values, t_list->len, sizeof(void*), t_list->compare);
+  printf("\nafter qsort: "); walk(t_list, show_test);
+  printf("\nminimum: %d\n",((Test*) t_list->minimum)->a);
+  printf("maximum: %d\n",((Test*) t_list->maximum)->a);
 
-  qsort(l->values, l->len, sizeof(void*), compare_test);
-
-  walk(l, show_test);
+  // Int test
+  int i[] = {5,4,3,2,1};
+  ArrList *i_list = init_list(5, compare_int);
+  add_value(i_list, &i);
+  add_value(i_list, &i[1]);
+  add_value(i_list, &i[2]);
+  add_value(i_list, &i[3]);
+  add_value(i_list, &i[4]);
+  
+  printf("\nbefore qsort: "); walk(i_list, show_int);
+  qsort(i_list->values, i_list->len, sizeof(void*), i_list->compare);
+  printf("\nafter qsort: "); walk(i_list, show_int);
+  printf("\nminimum: %d\n",((Test*) i_list->minimum)->a);
+  printf("maximum: %d\n",((Test*) i_list->maximum)->a);
 
   return  EXIT_SUCCESS;
 }
