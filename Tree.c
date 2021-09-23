@@ -6,28 +6,33 @@
 typedef struct tree {
   size_t size;   
   void *key;    
-  struct tree *left, *right;
-  int (*compare_key)(void*, void*);
+  struct tree *left, *right, *minimum, *maximum;
+  int (*compare_key)(const void*, const void*);
 } Tree;
 
 Tree *init_tree(void *value, int (*compare)(void*, void*)) {
-  Tree *root = 
-    (Tree*) calloc(1, sizeof(Tree));
-  root->left = root->right = NULL;
-  root->size = 
-    value == NULL ? 0 : 1; 
+  Tree *root = (Tree*) calloc(1, sizeof(Tree));
+  root->left = root->right = root->maximum = root->minimum = NULL;
+  root->size = value == NULL ? 0 : 1; 
   root->key = value;
   root->compare_key = compare;
   return root;
 }
 
 void detroy_tree(Tree *root) {}
+
 void insert(Tree* root, void *key) {
   root->size++;
   if(root->key == NULL) {
     root->key = key;
     return;
   }
+
+  if(root->minimum == NULL || root->compare_key(root->key, key) < 0)
+    root->minimum = key;
+  if(root->maximum == NULL || root->compare_key(root->key, key) > 0)
+    root->maximum = key;
+
   if(root->compare_key(root->key, key) < 0) {
     if(root->left == NULL)
       root->left = init_tree(key, root->compare_key);
@@ -61,4 +66,8 @@ void walk(Tree* root, void (*action)(void*)) {
   walk(root->right, action);
 }
 // ============= END TREE =============
+
+int main(void) {
+  return EXIT_SUCCESS;
+}
 
