@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+// ====== START TREE ======
 typedef struct tree {
   size_t size;   
   void *key;    
@@ -10,7 +11,7 @@ typedef struct tree {
   int (*compare_key)(const void*, const void*);
 } Tree;
 
-Tree *init_tree(void *value, int (*compare)(void*, void*)) {
+Tree *init_tree(void *value, int (*compare)(const void*, const void*)) {
   Tree *root = (Tree*) calloc(1, sizeof(Tree));
   root->left = root->right = root->maximum = root->minimum = NULL;
   root->size = value == NULL ? 0 : 1; 
@@ -18,8 +19,11 @@ Tree *init_tree(void *value, int (*compare)(void*, void*)) {
   root->compare_key = compare;
   return root;
 }
-
+/** TODO */
 void detroy_tree(Tree *root) {}
+
+/** TODO */
+void delete(Tree *root, void* key) {}
 
 void insert(Tree* root, void *key) {
   root->size++;
