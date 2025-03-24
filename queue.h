@@ -24,8 +24,9 @@ typedef struct __queue {
 } queue;
 
 queue *queue_new(int (*)(const void *, const void *));
-bool queue_is_empty(queue *q);
-queue_status enqueue(queue *q, const void *value);
-queue_status dequeue(queue *q);
+bool queue_is_empty(queue *);
+size_t queue_size(queue *);
+queue_status enqueue(queue *, const void *);
+queue_status dequeue(queue *);
 
 #endif // !DEBUG

@@ -11,6 +11,8 @@ queue *queue_new(int (*compare)(const void *, const void *)) {
 
 bool queue_is_empty(queue *q) { return list_is_empty(q->l); }
 
+size_t queue_size(queue *q) { return q->l->length; }
+
 queue_status enqueue(queue *q, const void *value) {
   list_status ls = list_add_last(q->l, (const void *)value);
 
@@ -41,7 +43,7 @@ queue_status dequeue(queue *q) {
 int q_compare_int(const void *a, const void *b) {
   return *(int *)a - *(int *)b;
 }
-
+/*
 int main(void) {
   queue *qq = queue_new(q_compare_int);
 
@@ -64,3 +66,4 @@ int main(void) {
 
   return EXIT_SUCCESS;
 }
+*/
