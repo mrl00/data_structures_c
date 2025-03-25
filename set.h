@@ -17,9 +17,7 @@ typedef struct {
   enum SET_STATUS_ENUM status;
 } set_status;
 
-typedef struct __set {
-  list *l;
-} set;
+typedef list set;
 
 const char *set_status_string(enum SET_STATUS_ENUM);
 bool set_is_empty(set *);
