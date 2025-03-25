@@ -4,7 +4,7 @@
 #include "set.h"
 
 typedef struct {
-  const void *value;
+  void *value;
 } vertex;
 
 typedef struct {

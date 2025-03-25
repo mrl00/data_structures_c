@@ -1,4 +1,4 @@
-#include "../graph.h"
+#include "graph.h"
 #include <assert.h>
 
 int cmp_int(const void *a, const void *b) { return *(int *)a - *(int *)b; }
@@ -25,8 +25,8 @@ int main(void) {
   vertex_adj *va = graph_vtx_adj_new(&xs3[0], &cmp_vtx);
   assert((*(int *)va->v->value) == 1);
 
-  // set_add(va->adj_list, &xs3[1]);
-  // set_add(va->adj_list, &xs3[2]);
+  set_add(va->adj_list, &xs3[1]);
+  set_status ss = set_add(va->adj_list, &xs3[2]);
   // set_add(va->adj_list, &xs3[3]);
 
   // int k = 2;
@@ -36,3 +36,4 @@ int main(void) {
 
   return EXIT_SUCCESS;
 }
+
