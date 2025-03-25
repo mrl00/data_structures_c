@@ -19,9 +19,7 @@ typedef struct {
   enum QUEUE_STATUS_ENUM status;
 } queue_status;
 
-typedef struct __queue {
-  list *l;
-} queue;
+typedef list queue;
 
 queue *queue_new(int (*)(const void *, const void *));
 bool queue_is_empty(queue *);
