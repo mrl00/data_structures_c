@@ -1,192 +1,78 @@
-#include <limits.h>
-#include <stdbool.h>
+#include "graph.h"
+#include "list.h"
+#include "set.h"
 #include <stdio.h>
-#include <stdlib.h>
 
-/*
- * ============================================================
- *                         LIST
- * ============================================================
- */
-
-typedef enum LIST_STATUS_ENUM {
-  LIST_OK_ADDED_ELEMENT,
-  LIST_ERROR_CANNOT_ADD_ELEMENT,
-  LIST_ERROR_NODES_ARE_NOT_ADJACENTS,
-  LIST_OK_REMOVED_ELEMENT,
-  LIST_ERROR_CANNOT_REMOVE_ELEMENT_NOT_FOUND,
-  LIST_EMPTY_LIST,
-} list_status;
-
-typedef struct __node {
-  void *value;
-  struct __node *prev, *next;
-} node;
-
-node *node_new(node *prev, node *next, const void *value);
-
-typedef struct __list {
-  node *header, *trailer;
-  size_t length;
-  int (*compare)(const void *, const void *);
-} list;
-
-list *list_new(int (*compare)(const void *, const void *));
-node *list_find(list *l, const void *x);
-bool list_is_empty(list *);
-
-list_status list_add_node_between(node *a, node *b, const void *value);
-node *list_first(list *l);
-node *list_last(list *l);
-list_status list_add_first(list *l, const void *value);
-list_status list_add_last(list *l, const void *value);
-list_status list_remove(list *l, const void *value);
-
-
-/*
- * ============================================================
- *                     GRAPH STRUCTS
- * ============================================================
- */
-
-typedef enum VERTEX_STATUS { WHITE, GRAY, BLACK } vertex_status;
-typedef enum GRAPH_STATUS {
-  OK_ADDED_VERTEX,
-  ERROR_CANNOT_ADD_VERTEX,
-  ERROR_VERTEX_ALREADY_EXISTS,
-  OK_ADDED_EDGE,
-  ERROR_CANNOT_ADD_EDGE,
-  ERROR_EDGE_ALREADY_EXISTS,
-} graph_status;
-
-typedef struct __vertex {
-  void *value;
-  vertex_status status;
-  int distance;
-  struct __vertex *predecessor;
-  list *adj_list;
-} vertex;
-
-typedef struct __edge {
-  void *weight;
-  vertex *a, *b;
-} edge;
-
-typedef struct __graph {
-  bool digraph;
-  list *vertices;
-  list *edges;
-  int (*cmp_vtx)(const void *value_1, const void *value_2);
-  int (*cmp_edg)(const void *value_1, const void *value_2);
-} graph;
-
-vertex *vertex_new(const void *value, int (*)(const void *, const void *));
-edge *edge_new(const vertex *vertex_1, const vertex *vertex_2);
-graph *graph_new(bool, int (*cmp_vtx)(const void *, const void *),
-                 int (*cmp_edg)(const void *, const void *));
-
-graph_status graph_add_vertex(graph *g, const void *value);
-graph_status graph_add_edge(graph *g, const void *value_1, const void *value_2);
-
-/*
- * ============================================================
- *                     AUX FUNCTIONS
- * ============================================================
- */
-int compare_int(const void *a, const void *b) {
-  int a_v = *((int *)a);
-  int b_v = *((int *)b);
-  return a_v - b_v;
-}
-
-int compare_int_vertex(const void *a, const void *b) {
-  vertex *v_a = (vertex *)a;
-  vertex *v_b = (vertex *)b;
-  return compare_int(v_a->value, v_b->value);
-}
-
-int compare_int_edge(const void *a, const void *b) {
-  edge *e_a = (edge *)a;
-  edge *e_b = (edge *)b;
-  return (compare_int_vertex(e_a->a, e_b->a) |
-          compare_int_vertex(e_a->b, e_b->b));
-}
-
-void walk(void **xs, void (*action)(const void *x)) {
-  for (void **i = xs; *i != NULL; ++i) {
-    action((*i));
-  }
-}
-
-void print_int(const void *x) { printf("%d ", *((int *)x)); }
-
-void graph_bsf_vertex_prepare_status(const void *s) {
-  vertex *ss = (vertex *)s;
-  ss->status = WHITE;
-  ss->distance = INT_MAX;
-  ss->predecessor = NULL;
-}
-
-/*
- * ============================================================
- *                           MAIN
- * ============================================================
- */
-//int main(int argc, char *argv[]) { return EXIT_SUCCESS; }
-
-/*
- * ============================================================
- *                          GRAPH
- * ============================================================
- */
-vertex *vertex_new(const void *element,
-                   int (*compare_vertex)(const void *, const void *)) {
+vertex *graph_vertex_new(const void *value) {
   vertex *v = (vertex *)calloc(1, sizeof(vertex));
-  v->adj_list = set_new(compare_vertex);
-  v->value = (void *)element;
-  v->distance = INT_MAX;
-  v->predecessor = NULL;
-  v->status = WHITE;
+  v->value = (void *)value;
   return v;
 }
 
-edge *edge_new(const vertex *a, const vertex *b) {
+vertex_adj *graph_vtx_adj_new(const void *value,
+                              int (*cmp_vtx)(const void *, const void *)) {
+  vertex_adj *vas = (vertex_adj *)calloc(1, sizeof(vertex_adj));
+  vas->v = graph_vertex_new(value);
+  vas->adj_list = set_new(cmp_vtx);
+  return vas;
+}
+
+edge *graph_edge_new(vertex *start, vertex *end, long weight) {
   edge *e = (edge *)calloc(1, sizeof(edge));
-  e->a = (vertex *)a, e->b = (vertex *)b;
+  e->start = start, e->end = end, e->weight = weight;
   return e;
 }
 
-graph *graph_new(bool digraph, int (*cmp_vtx)(const void *, const void *),
-                 int (*cmp_edg)(const void *, const void *)) {
+graph *graph_new(int (*cmp_vtx)(const void *, const void *),
+                 int (*cmp_edg)(const void *, const void *),
+                 int (*cmp_vtx_adj)(const void *, const void *)) {
+
   graph *g = (graph *)calloc(1, sizeof(graph));
-  g->digraph = digraph;
   g->cmp_vtx = cmp_vtx;
+  g->vertex_set = set_new(cmp_vtx_adj);
   g->cmp_edg = cmp_edg;
-  g->vertices = set_new(cmp_vtx);
-  g->edges = set_new(cmp_edg);
+  g->edge_set = set_new(cmp_edg);
   return g;
 }
 
-graph_status graph_add_vertex(graph *g, const void *value) {
+set *graph_vertices(graph *g) { return g->vertex_set; }
+set *graph_edges(graph *g) { return g->edge_set; }
 
-  switch (set_add_element(g->vertices, vertex_new(value, g->cmp_vtx))) {
-  OK_ADDED_ELEMENT:
-    return OK_ADDED_VERTEX;
+graph_status graph_insert_vertex(graph *g, const void *value) {
+  vertex_adj *va = graph_vtx_adj_new(value, g->cmp_vtx);
+  set_status ss = set_add(g->edge_set, value);
+
+  switch (ss.status) {
+  case SET_ERROR_CANNOT_ADD_ELEMENT_ALREADY_EXISTS:
+    return (graph_status){NULL, GRAPH_INSERT_VERTEX_ALREADY_EXISTS};
+  case SET_OK_ADDED_ELEMENT:
+    return (graph_status){ss.n, GRAPH_INSERT_VERTEX_OK};
   default:
-    return ERROR_CANNOT_ADD_VERTEX;
+    return (graph_status){NULL, GRAPH_INSERT_VERTEX_CANNOT_INSERT};
+  };
+}
+
+graph_status graph_insert_edge(graph *g, const void *v1, const void *v2,
+                               long weight) {
+  node *n1 = list_find(g->vertex_set, v1);
+  if (n1 == NULL)
+    return (graph_status){NULL, GRAPH_INSERT_EDGE_VERTEX_V1_IS_NOT_A_MEMBER};
+
+  node *n2 = list_find(g->vertex_set, v2);
+  if (n2 == NULL)
+    return (graph_status){NULL, GRAPH_INSERT_EDGE_VERTEX_V2_IS_NOT_A_MEMBER};
+
+  edge *e = graph_edge_new((vertex *)n1->value, (vertex *)n2->value, weight);
+
+  set_status ss = set_add(g->edge_set, e);
+
+  switch (ss.status) {
+  case SET_ERROR_CANNOT_ADD_ELEMENT_ALREADY_EXISTS:
+    return (graph_status){NULL, GRAPH_INSERT_EDGE_ALREADY_EXISTS};
+  case SET_OK_ADDED_ELEMENT:
+    return (graph_status){ss.n, GRAPH_INSERT_EDGE_OK};
+  default:
+    return (graph_status){NULL, GRAPH_INSERT_EDGE_CANNOT_INSERT};
   }
+  return (graph_status){NULL, GRAPH_INSERT_VERTEX_CANNOT_INSERT};
 }
-
-graph_status graph_add_edge(graph *g, const void *value_1,
-                            const void *value_2) {
-  return ERROR_CANNOT_ADD_EDGE;
-}
-/*
- * ============================================================
- *                     GRAPH ALGORITHMS
- * ============================================================
- */
-
-void graph_bsf(graph *g, vertex *s) {}
-
-void graph_dfs(graph *g) {}
