@@ -1,4 +1,4 @@
-#include "graph.h"
+#include "../graph.h"
 #include <assert.h>
 
 int cmp_int(const void *a, const void *b) { return *(int *)a - *(int *)b; }

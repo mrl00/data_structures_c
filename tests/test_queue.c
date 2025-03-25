@@ -1,4 +1,4 @@
-#include "queue.h"
+#include "../queue.h"
 #include <stdio.h>
 
 int q_compare_int(const void *a, const void *b) {
