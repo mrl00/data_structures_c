@@ -25,7 +25,7 @@ list *list_new(int (*compare)(const void *, const void *)) {
 bool list_is_empty(list *l) { return l->length == 0; }
 
 node *list_find(list *l, const void *value) {
-  for (node *i = l->header->next; i->next != NULL; i = i->next)
+  for (node *i = l->header->next; i != l->trailer; i = i->next)
     if (l->compare(i->value, value) == 0)
       return i;
   return NULL;
@@ -43,17 +43,21 @@ list_status list_add_node_between(node *a, node *b, const void *value) {
   return (list_status){.n = n, .status = LIST_OK_ADDED_ELEMENT};
 }
 
-list_status list_first(list *l) {
+node *list_first(list *l) {
   if (list_is_empty(l))
-    return (list_status){.n = NULL, .status = LIST_EMPTY_LIST};
-  return (list_status){.n = l->header->next, .status = LIST_FIRST_NODE};
+    return NULL;
+  return l->header->next;
 }
 
-list_status list_last(list *l) {
+node *list_header(list *l) { return l->header; }
+
+node *list_last(list *l) {
   if (list_is_empty(l))
-    return (list_status){.n = NULL, .status = LIST_EMPTY_LIST};
-  return (list_status){.n = l->trailer->prev, .status = LIST_LAST_NODE};
+    return NULL;
+  return l->trailer->prev;
 }
+
+node *list_trailer(list *l) { return l->trailer; }
 
 list_status list_add_first(list *l, const void *value) {
   list_status ls = list_add_node_between(l->header, l->header->next, value);

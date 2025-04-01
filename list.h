@@ -38,8 +38,10 @@ node *list_find(list *l, const void *x);
 bool list_is_empty(list *);
 
 list_status list_add_node_between(node *a, node *b, const void *value);
-list_status list_first(list *l);
-list_status list_last(list *l);
+node *list_first(list *l);
+node *list_header(list *l);
+node *list_last(list *l);
+node *list_trailer(list *l);
 list_status list_add_first(list *l, const void *value);
 list_status list_add_last(list *l, const void *value);
 list_status list_remove_first(list *l);

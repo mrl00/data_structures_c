@@ -1,0 +1,7 @@
+tests_build_path = ./build/tests
+tests_path = ./tests
+
+rule build_test_graph
+  command = gcc -o $tests_build_path/$out $tests_path/$in graph.c set.c list.c
+
+build test_graph.o: build_test_graph test_graph.c

@@ -2,6 +2,7 @@
 #define __GRAPH_H__
 
 #include "set.h"
+#include <stdbool.h>
 
 typedef struct {
   void *value;
@@ -47,7 +48,7 @@ vertex_adj *graph_vtx_adj_new(const void *,
 
 edge *graph_edge_new(vertex *, vertex *, long);
 
-graph *graph_new(int (*cmp_vtx)(const void *, const void *),
+graph *graph_new(bool, int (*cmp_vtx)(const void *, const void *),
                  int (*cmp_edg)(const void *, const void *),
                  int (*cmp_vtx_adj)(const void *, const void *));
 
